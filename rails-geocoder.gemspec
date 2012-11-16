@@ -28,7 +28,7 @@ Gem::Specification.new do |s|
      "lib/geocoder.rb",
      "lib/tasks/geocoder_tasks.rake",
      "rails-geocoder.gemspec",
-     "test/fixtures/madison_square_garden.xml",
+     "test/fixtures/madison_square_garden.json",
      "test/geocoder_test.rb",
      "test/test_helper.rb"
   ]
