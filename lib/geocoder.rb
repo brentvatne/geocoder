@@ -294,8 +294,12 @@ module Geocoder
   # Returns array [lat,lon] if found, nil if not found.
   #
   def self.fetch_coordinates(query)
-    return nil unless location = Location.find_by_zipcode(query)
-    location.coordinates
+    location = Location.find_by_zipcode(query)
+    if location.nil?
+      return nil
+    else
+      location.coordinates
+    end
   end
 end
 
