@@ -1,7 +1,7 @@
 require 'net/http'
 
 ##
-# Add geocoding functionality (via Google) to any object.
+# Add geocoding functionality (via Database lookup) to any object.
 #
 module Geocoder
 
@@ -290,56 +290,12 @@ module Geocoder
   end
 
   ##
-  # Query Google for geographic information about the given phrase.
-  # Returns a hash representing a valid geocoder response.
-  # Returns nil if non-200 HTTP response, timeout, or other error.
-  #
-  def self.search(query)
-    doc = _fetch_parsed_response(query)
-    doc && doc['status'] == "OK" ? doc : nil
-  end
-
-  ##
-  # Query Google for the coordinates of the given phrase.
-  # Returns array [lat,lon] if found, nil if not found or if network error.
+  # Query the Database for the coordinates of the given phrase.
+  # Returns array [lat,lon] if found, nil if not found.
   #
   def self.fetch_coordinates(query)
-    return nil unless doc = self.search(query)
-    # blindly use the first results (assume they are most accurate)
-    place = doc['results'].first['geometry']['location']
-    ['lat', 'lng'].map{ |i| place[i] }
-  end
-
-  ##
-  # Returns a parsed Google geocoder search result (hash).
-  # This method is not intended for general use (prefer Geocoder.search).
-  #
-  def self._fetch_parsed_response(query)
-    if doc = _fetch_raw_response(query)
-      ActiveSupport::JSON.decode(doc)
-    end
-  end
-
-  ##
-  # Returns a raw Google geocoder search result (JSON).
-  # This method is not intended for general use (prefer Geocoder.search).
-  #
-  def self._fetch_raw_response(query)
-    return nil if query.blank?
-
-    # build URL
-    params = { :address => query, :sensor  => "false" }
-    url = "http://maps.google.com/maps/api/geocode/json?" + params.to_query
-
-    # query geocoder and make sure it responds quickly
-    begin
-      resp = nil
-      timeout(3) do
-        Net::HTTP.get_response(URI.parse(url)).body
-      end
-    rescue SocketError, TimeoutError
-      return nil
-    end
+    return nil unless location = Location.find_by_zipcode(query)
+    location.coordinates
   end
 end
 
